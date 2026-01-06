@@ -9,6 +9,8 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
+import { updateInvoice, State } from '@/app/lib/actions';
+import { useActionState } from 'react';
 
 export default function EditInvoiceForm({
   invoice,
@@ -17,8 +19,17 @@ export default function EditInvoiceForm({
   invoice: InvoiceForm;
   customers: CustomerField[];
 }) {
+  const initialState: State = { message: null, errors: {} };
+  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
+  const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
+
   return (
-    <form>
+    <form action={formAction}>
+      {state.message && (
+        <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-600">
+          {state.message}
+        </div>
+      )}
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -43,6 +54,11 @@ export default function EditInvoiceForm({
             </select>
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           </div>
+          {state.errors?.customerId && (
+            <div className="mt-2 text-sm text-red-500">
+              {state.errors.customerId}
+            </div>
+          )}
         </div>
 
         {/* Invoice Amount */}
@@ -64,6 +80,11 @@ export default function EditInvoiceForm({
               <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
           </div>
+          {state.errors?.amount && (
+            <div className="mt-2 text-sm text-red-500">
+              {state.errors.amount}
+            </div>
+          )}
         </div>
 
         {/* Invoice Status */}
@@ -106,10 +127,15 @@ export default function EditInvoiceForm({
                 </label>
               </div>
             </div>
-          </div>
-        </fieldset>
-      </div>
-      <div className="mt-6 flex justify-end gap-4">
+            </div>
+            {state.errors?.status && (
+            <div className="mt-2 text-sm text-red-500">
+              {state.errors.status}
+            </div>
+            )}
+            </fieldset>
+            </div>
+            <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/invoices"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
